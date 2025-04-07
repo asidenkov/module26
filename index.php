@@ -16,7 +16,7 @@ interface ExtraFunctionsInterface
 // Абстрактный класс для всех машин
 abstract class Vehicle
 {
-    protected string $name; // название транспортного средства
+    protected string $name;     // название транспортного средства
     protected string $interior; // индивидуальность: отделка салона
 
     public function __construct(string $name, string $interior)
@@ -25,16 +25,19 @@ abstract class Vehicle
         $this->interior = $interior;
     }
 
+    // Метод движения вперёд
     public function moveForward(): void
     {
-        echo "{$this->name} едет вперёд<br>";
+        // логика движения вперёд
     }
 
+    // Метод движения назад
     public function moveBackward(): void
     {
-        echo "{$this->name} едет назад<br>";
+        // логика движения назад
     }
 
+    // Абстрактный метод для вывода информации
     abstract public function info(): void;
 }
 
@@ -43,23 +46,22 @@ class Car extends Vehicle implements SpecialAbilityInterface, ExtraFunctionsInte
 {
     public function useSpecialAbility(): void
     {
-        echo "{$this->name} активирует закись азота! 💨<br>";
+        // реализация закиси азота
     }
 
     public function honk(): void
     {
-        echo "{$this->name} сигналит: Бип-бип! 🔊<br>";
+        // реализация сигнала
     }
 
     public function useWipers(): void
     {
-        echo "{$this->name} включает дворники! 💦<br>";
+        // реализация дворников
     }
 
     public function info(): void
     {
-        echo "Это легковой автомобиль: {$this->name}<br>";
-        echo "Салон: {$this->interior}<br>";
+        // информация о машине и салоне
     }
 }
 
@@ -68,23 +70,22 @@ class Bulldozer extends Vehicle implements SpecialAbilityInterface, ExtraFunctio
 {
     public function useSpecialAbility(): void
     {
-        echo "{$this->name} поднимает ковш! 🛠<br>";
+        // реализация ковша
     }
 
     public function honk(): void
     {
-        echo "{$this->name} ревёт: ГРОМ! 💥<br>";
+        // реализация сигнала
     }
 
     public function useWipers(): void
     {
-        echo "{$this->name} чистит лобовое стекло! 🌧<br>";
+        // реализация дворников
     }
 
     public function info(): void
     {
-        echo "Это бульдозер: {$this->name}<br>";
-        echo "Салон: {$this->interior}<br>";
+        // информация о бульдозере и салоне
     }
 }
 
@@ -93,18 +94,17 @@ class Tank extends Vehicle implements ExtraFunctionsInterface
 {
     public function honk(): void
     {
-        echo "{$this->name} гудит: БРРРР! 🚨<br>";
+        // реализация сигнала
     }
 
     public function useWipers(): void
     {
-        echo "{$this->name} включает военные дворники! 🧽<br>";
+        // реализация дворников
     }
 
     public function info(): void
     {
-        echo "Это танк: {$this->name}<br>";
-        echo "Салон: {$this->interior}<br>";
+        // информация о танке и салоне
     }
 }
 
@@ -124,15 +124,14 @@ function controlMachine(Vehicle $vehicle): void
     }
 
     $vehicle->moveBackward();
-    echo "<hr>";
 }
 
-// Тест — создаём разные машины
+// Тест — создаём разные машины с индивидуальностью салона
 $car = new Car("BMW M3", "кожаный салон с красной прострочкой");
 $bulldozer = new Bulldozer("CAT D9", "металлический интерьер с кондиционером");
 $tank = new Tank("Т-90", "бронированный салон с цифровой панелью");
 
-// Проверка
+// Управляем техникой
 controlMachine($car);
 controlMachine($bulldozer);
 controlMachine($tank);
