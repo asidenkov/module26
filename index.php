@@ -1,137 +1,57 @@
 <?php
 
-// Интерфейс спецспособностей (закись, ковш и т.д.)
-interface SpecialAbilityInterface
+class MetaExtractor
 {
-    public function useSpecialAbility(): void;
-}
+    private string $html;
+    private array $meta = [
+        'title' => '',
+        'description' => '',
+        'keywords' => ''
+    ];
 
-// Интерфейс дополнительных функций (гудок, дворники)
-interface ExtraFunctionsInterface
-{
-    public function honk(): void;
-    public function useWipers(): void;
-}
-
-// Абстрактный класс для всех машин
-abstract class Vehicle
-{
-    protected string $name;     // название транспортного средства
-    protected string $interior; // индивидуальность: отделка салона
-
-    public function __construct(string $name, string $interior)
+    public function __construct(string $html)
     {
-        $this->name = $name;
-        $this->interior = $interior;
+        $this->html = $html;
     }
 
-    // Метод движения вперёд
-    public function moveForward(): void
+    public function extract(): array
     {
-        // логика движения вперёд
+        $this->extractTitle();
+        $this->extractMetaTags();
+        return $this->meta;
     }
 
-    // Метод движения назад
-    public function moveBackward(): void
+    private function extractTitle(): void
     {
-        // логика движения назад
+        if (preg_match('/<title>(.*?)<\/title>/si', $this->html, $matches)) {
+            $this->meta['title'] = trim($matches[1]);
+        }
     }
 
-    // Абстрактный метод для вывода информации
-    abstract public function info(): void;
-}
-
-// Легковая машина
-class Car extends Vehicle implements SpecialAbilityInterface, ExtraFunctionsInterface
-{
-    public function useSpecialAbility(): void
+    private function extractMetaTags(): void
     {
-        // реализация закиси азота
-    }
-
-    public function honk(): void
-    {
-        // реализация сигнала
-    }
-
-    public function useWipers(): void
-    {
-        // реализация дворников
-    }
-
-    public function info(): void
-    {
-        // информация о машине и салоне
+        if (preg_match_all('/<meta[^>]+>/i', $this->html, $allMetaTags)) {
+            foreach ($allMetaTags[0] as $tag) {
+                if (stripos($tag, 'name="description"') !== false || stripos($tag, "name='description'") !== false) {
+                    if (preg_match('/content=["\'](.*?)["\']/i', $tag, $match)) {
+                        $this->meta['description'] = trim($match[1]);
+                    }
+                }
+                if (stripos($tag, 'name="keywords"') !== false || stripos($tag, "name='keywords'") !== false) {
+                    if (preg_match('/content=["\'](.*?)["\']/i', $tag, $match)) {
+                        $this->meta['keywords'] = trim($match[1]);
+                    }
+                }
+            }
+        }
     }
 }
 
-// Бульдозер
-class Bulldozer extends Vehicle implements SpecialAbilityInterface, ExtraFunctionsInterface
-{
-    public function useSpecialAbility(): void
-    {
-        // реализация ковша
-    }
 
-    public function honk(): void
-    {
-        // реализация сигнала
-    }
+$html = file_get_contents('file.html');
+$extractor = new MetaExtractor($html);
+$result = $extractor->extract();
 
-    public function useWipers(): void
-    {
-        // реализация дворников
-    }
-
-    public function info(): void
-    {
-        // информация о бульдозере и салоне
-    }
-}
-
-// Танки (без спецспособности, но с гудком и дворниками)
-class Tank extends Vehicle implements ExtraFunctionsInterface
-{
-    public function honk(): void
-    {
-        // реализация сигнала
-    }
-
-    public function useWipers(): void
-    {
-        // реализация дворников
-    }
-
-    public function info(): void
-    {
-        // информация о танке и салоне
-    }
-}
-
-// Полиморфная функция, которая принимает любую технику
-function controlMachine(Vehicle $vehicle): void
-{
-    $vehicle->info();
-    $vehicle->moveForward();
-
-    if ($vehicle instanceof SpecialAbilityInterface) {
-        $vehicle->useSpecialAbility();
-    }
-
-    if ($vehicle instanceof ExtraFunctionsInterface) {
-        $vehicle->honk();
-        $vehicle->useWipers();
-    }
-
-    $vehicle->moveBackward();
-}
-
-// Тест — создаём разные машины с индивидуальностью салона
-$car = new Car("BMW M3", "кожаный салон с красной прострочкой");
-$bulldozer = new Bulldozer("CAT D9", "металлический интерьер с кондиционером");
-$tank = new Tank("Т-90", "бронированный салон с цифровой панелью");
-
-// Управляем техникой
-controlMachine($car);
-controlMachine($bulldozer);
-controlMachine($tank);
+echo "Title: {$result['title']}\n";
+echo "Description: {$result['description']}\n";
+echo "Keywords: {$result['keywords']}\n";
