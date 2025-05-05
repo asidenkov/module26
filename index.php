@@ -1,6 +1,6 @@
 <?php
 
-class MetaExtractor
+class MetaExtractor implements Iterator
 {
     private string $html;
     private array $meta = [
@@ -9,16 +9,20 @@ class MetaExtractor
         'keywords' => ''
     ];
 
+    private int $position = 0;
+    private array $keys = [];
+
     public function __construct(string $html)
     {
         $this->html = $html;
+        $this->extract();
+        $this->keys = array_keys($this->meta);
     }
 
-    public function extract(): array
+    private function extract(): void
     {
         $this->extractTitle();
         $this->extractMetaTags();
-        return $this->meta;
     }
 
     private function extractTitle(): void
@@ -45,13 +49,39 @@ class MetaExtractor
             }
         }
     }
+
+    
+
+    public function current(): mixed
+    {
+        return $this->meta[$this->keys[$this->position]];
+    }
+
+    public function key(): mixed
+    {
+        return $this->keys[$this->position];
+    }
+
+    public function next(): void
+    {
+        $this->position++;
+    }
+
+    public function rewind(): void
+    {
+        $this->position = 0;
+    }
+
+    public function valid(): bool
+    {
+        return isset($this->keys[$this->position]);
+    }
 }
 
 
 $html = file_get_contents('file.html');
 $extractor = new MetaExtractor($html);
-$result = $extractor->extract();
 
-echo "Title: {$result['title']}\n";
-echo "Description: {$result['description']}\n";
-echo "Keywords: {$result['keywords']}\n";
+foreach ($extractor as $key => $value) {
+    echo ucfirst($key) . ": $value<br>";
+}
